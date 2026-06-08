@@ -1,0 +1,2399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Norton University - Surgical Pathology 1 Quiz</title>
+<style>
+  :root {
+    --page-bg:#ffffff;
+    --card-bg:#f8f9fa;
+    --text:#1a1a1a;
+    --muted:#666666;
+    --border:#d7dce1;
+    --option-bg:#ffffff;
+    --option-hover:#f0f2f5;
+    --track:#e6e9ed;
+    --blue:#2f80ed;
+    --green:#25a55b;
+    --red:#d64545;
+    --bubble:#e0e0e0;
+    --shadow:0 12px 30px rgba(0,0,0,0.10);
+  }
+  * { box-sizing:border-box; }
+  body {
+    margin:0;
+    font-family:Arial, Helvetica, sans-serif;
+    background:var(--page-bg);
+    color:var(--text);
+    min-height:100vh;
+    padding:24px 12px 90px;
+  }
+  .app { max-width:920px; margin:0 auto; }
+  .header { text-align:center; margin-bottom:18px; }
+  .header h1 {
+    margin:0;
+    font-size:clamp(26px, 5vw, 42px);
+    letter-spacing:.2px;
+  }
+  .header p {
+    margin:8px 0 0;
+    font-size:clamp(16px, 3vw, 21px);
+    color:#333;
+    font-weight:700;
+  }
+  .card {
+    background:var(--card-bg);
+    border:1px solid #edf0f3;
+    box-shadow:var(--shadow);
+    border-radius:22px;
+    padding:22px;
+  }
+  .session-row {
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    flex-wrap:wrap;
+    margin-bottom:14px;
+  }
+  .session-title { font-weight:900; font-size:18px; }
+  .session-controls { display:flex; gap:10px; flex-wrap:wrap; }
+  button {
+    border:0;
+    border-radius:12px;
+    padding:10px 14px;
+    font-weight:800;
+    cursor:pointer;
+    background:#e9ecef;
+    color:#222;
+    transition:.15s ease;
+  }
+  button:hover { filter:brightness(.96); }
+  button:disabled { opacity:.45; cursor:not-allowed; }
+  .progress-wrap {
+    height:12px;
+    background:var(--track);
+    border-radius:999px;
+    overflow:hidden;
+    margin:10px 0 14px;
+  }
+  .progress-fill {
+    height:100%;
+    width:0%;
+    background:linear-gradient(90deg, var(--blue), var(--green));
+    border-radius:999px;
+    transition:width .25s ease;
+  }
+  .bubbles {
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin:12px 0 20px;
+  }
+  .bubble {
+    width:34px;
+    height:34px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:var(--bubble);
+    color:#444;
+    border:3px solid transparent;
+    font-size:13px;
+    font-weight:900;
+    cursor:pointer;
+    user-select:none;
+  }
+  .bubble.correct { background:var(--green); color:#fff; }
+  .bubble.wrong { background:var(--red); color:#fff; }
+  .bubble.active { border-color:var(--blue); }
+  .meta {
+    display:flex;
+    justify-content:space-between;
+    gap:12px;
+    color:var(--muted);
+    font-size:14px;
+    margin-bottom:12px;
+    flex-wrap:wrap;
+  }
+  .question {
+    font-size:clamp(19px, 3.5vw, 25px);
+    line-height:1.35;
+    font-weight:900;
+    margin:8px 0 18px;
+  }
+  .options { display:grid; gap:12px; }
+  .option {
+    width:100%;
+    text-align:left;
+    background:var(--option-bg);
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:15px 16px;
+    font-size:16px;
+    line-height:1.35;
+    font-weight:700;
+    color:var(--text);
+  }
+  .option:hover { background:var(--option-hover); }
+  .option.correct {
+    background:#e7f8ee;
+    border-color:var(--green);
+    color:#0c7039;
+  }
+  .option.wrong {
+    background:#fdeaea;
+    border-color:var(--red);
+    color:#a22626;
+  }
+  .nav-row {
+    display:flex;
+    justify-content:space-between;
+    gap:12px;
+    margin-top:20px;
+  }
+  .primary { background:var(--blue); color:white; }
+  .score-screen { text-align:center; padding:22px 8px; }
+  .score-circle {
+    width:150px;
+    height:150px;
+    border-radius:50%;
+    margin:12px auto 18px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:34px;
+    font-weight:900;
+    color:#1a1a1a;
+    background:
+      radial-gradient(circle at center, var(--card-bg) 58%, transparent 59%),
+      conic-gradient(var(--green) var(--score-deg, 0deg), var(--track) 0deg);
+  }
+  .stats {
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:12px;
+    margin:18px 0;
+  }
+  .stat {
+    background:white;
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:14px;
+  }
+  .stat strong {
+    display:block;
+    font-size:28px;
+    margin-bottom:4px;
+  }
+  .admin-fab {
+    position:fixed;
+    right:18px;
+    bottom:18px;
+    width:58px;
+    height:58px;
+    border-radius:50%;
+    background:var(--blue);
+    color:white;
+    font-size:25px;
+    box-shadow:0 8px 20px rgba(0,0,0,.22);
+    z-index:20;
+  }
+  .admin-overlay {
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.28);
+    display:none;
+    z-index:30;
+    padding:14px;
+  }
+  .admin-panel {
+    background:white;
+    color:var(--text);
+    width:min(100%, 1040px);
+    max-height:92vh;
+    overflow:auto;
+    margin:20px auto;
+    border-radius:20px;
+    box-shadow:var(--shadow);
+    padding:18px;
+  }
+  .admin-top {
+    display:flex;
+    justify-content:space-between;
+    gap:12px;
+    align-items:center;
+    border-bottom:1px solid var(--border);
+    padding-bottom:12px;
+    margin-bottom:14px;
+  }
+  .admin-grid {
+    display:grid;
+    grid-template-columns:260px 1fr;
+    gap:16px;
+  }
+  .admin-list {
+    max-height:65vh;
+    overflow:auto;
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:8px;
+  }
+  .admin-item {
+    width:100%;
+    display:block;
+    text-align:left;
+    border-radius:10px;
+    padding:9px;
+    margin:4px 0;
+    background:#f3f4f6;
+    border:1px solid transparent;
+    font-size:13px;
+  }
+  .admin-item.active { border-color:var(--blue); background:#eaf2ff; }
+  label { display:block; font-weight:900; margin:10px 0 6px; }
+  textarea, input, select {
+    width:100%;
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:11px;
+    font:inherit;
+    background:white;
+    color:var(--text);
+  }
+  textarea { min-height:90px; resize:vertical; }
+  .admin-actions {
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-top:14px;
+  }
+  .danger { background:#fee2e2; color:#991b1b; }
+  .success { background:#dcfce7; color:#166534; }
+  .small-muted { color:#777; font-size:13px; margin-top:8px; line-height:1.4; }
+  .password-box {
+    max-width:420px;
+    margin:70px auto;
+    background:white;
+    border-radius:18px;
+    box-shadow:var(--shadow);
+    padding:20px;
+  }
+  .password-box h2 { margin:0 0 10px; }
+  .password-error { color:var(--red); font-weight:800; min-height:20px; margin-top:8px; }
+  @media (max-width:720px) {
+    body { padding:14px 8px 86px; }
+    .card { padding:16px; border-radius:18px; }
+    .session-controls, .nav-row { width:100%; }
+    .session-controls button, .nav-row button { flex:1; }
+    .bubble { width:31px; height:31px; font-size:12px; }
+    .stats { grid-template-columns:1fr; }
+    .admin-grid { grid-template-columns:1fr; }
+    .admin-list { max-height:210px; }
+    .admin-top { align-items:flex-start; flex-direction:column; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="header">
+    <h1>Norton University</h1>
+    <p>Surgical Pathology 1 — Prof. CHEA KIM LONG</p>
+  </header>
+
+  <main class="card" id="quizCard">
+    <div class="session-row">
+      <div class="session-title" id="sessionTitle">Session 1 of 5</div>
+      <div class="session-controls">
+        <button id="prevSessionBtn">← Prev Session</button>
+        <button id="nextSessionBtn">Next Session →</button>
+      </div>
+    </div>
+
+    <div class="progress-wrap"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="bubbles" id="bubbles"></div>
+
+    <section id="questionView">
+      <div class="meta">
+        <span id="questionCounter"></span>
+        <span id="answeredCounter"></span>
+      </div>
+      <div class="question" id="questionText"></div>
+      <div class="options" id="options"></div>
+      <div class="nav-row">
+        <button id="prevBtn">← Previous</button>
+        <button id="nextBtn" class="primary">Next →</button>
+      </div>
+    </section>
+
+    <section id="scoreView" class="score-screen" style="display:none">
+      <h2 id="scoreTitle">Session Complete</h2>
+      <div class="score-circle" id="scoreCircle">0%</div>
+      <div class="stats">
+        <div class="stat"><strong id="correctCount">0</strong>Correct</div>
+        <div class="stat"><strong id="wrongCount">0</strong>Wrong</div>
+        <div class="stat"><strong id="skippedCount">0</strong>Skipped</div>
+      </div>
+      <button class="primary" id="restartBtn">Restart this session</button>
+    </section>
+  </main>
+</div>
+
+<button class="admin-fab" id="adminFab" title="Admin panel">✎</button>
+
+<div class="admin-overlay" id="adminOverlay">
+  <div id="passwordGate" class="password-box">
+    <h2>Admin password</h2>
+    <div class="small-muted">Enter the password to edit questions.</div>
+    <label>Password</label>
+    <input type="password" id="adminPassword" autocomplete="current-password" />
+    <div class="admin-actions">
+      <button class="primary" id="passwordSubmit">Open Admin</button>
+      <button id="passwordCancel">Cancel</button>
+    </div>
+    <div id="passwordError" class="password-error"></div>
+  </div>
+
+  <div class="admin-panel" id="adminPanel" style="display:none">
+    <div class="admin-top">
+      <div>
+        <h2 style="margin:0">Admin Panel</h2>
+        <div class="small-muted">
+          Edit questions, options, correct answers, add or delete questions. Changes save instantly to localStorage.
+        </div>
+      </div>
+      <button id="closeAdmin">Close</button>
+    </div>
+
+    <div class="admin-actions" style="margin-top:0; margin-bottom:14px;">
+      <button class="primary" id="addQuestionBtn">+ Add new question</button>
+      <button class="success" id="exportHtmlBtn">Export as HTML</button>
+      <button class="danger" id="resetOriginalBtn">Reset to Original</button>
+    </div>
+
+    <div class="admin-grid">
+      <div>
+        <div class="small-muted" id="adminCount"></div>
+        <div class="admin-list" id="adminList"></div>
+      </div>
+      <div id="adminEditor">
+        <label>Question text</label>
+        <textarea id="editQ"></textarea>
+        <label>Option A</label>
+        <input id="editA" />
+        <label>Option B</label>
+        <input id="editB" />
+        <label>Option C</label>
+        <input id="editC" />
+        <label>Option D</label>
+        <input id="editD" />
+        <label>Correct answer</label>
+        <select id="editAnswer">
+          <option value="0">A</option>
+          <option value="1">B</option>
+          <option value="2">C</option>
+          <option value="3">D</option>
+        </select>
+        <div class="admin-actions">
+          <button id="saveQuestionBtn" class="primary">Save changes</button>
+          <button id="deleteQuestionBtn" class="danger">Delete question</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const ADMIN_PASSWORD = "Family-no-name";
+const STORAGE_KEY = "norton_surgical_pathology_1_163_questions_v1";
+
+const ORIGINAL_QUESTIONS = /*__QUESTIONS_START__*/[
+  {
+    "q": "Definition of cbc lab?",
+    "options": [
+      "A. Histology lab",
+      "B. Radiology lab",
+      "C. Virology lab",
+      "D. Brand of Med. lab"
+    ],
+    "answer": 3
+  },
+  {
+    "q": "Ex of sample used in cbc lab?",
+    "options": [
+      "A. Blood, urine",
+      "B. CSF",
+      "C. Gastric aspirate",
+      "D. All of these"
+    ],
+    "answer": 3
+  },
+  {
+    "q": "Use of bc lab?",
+    "options": [
+      "A. Dx",
+      "B. MT",
+      "C. Px, SD",
+      "D. All of these"
+    ],
+    "answer": 3
+  },
+  {
+    "q": "Core bc tests?",
+    "options": [
+      "A. Infreq. tests",
+      "B. Freq. tests",
+      "C. Rare tests",
+      "D. Any lab tests"
+    ],
+    "answer": 1
+  },
+  {
+    "q": "Specialized bc tests?",
+    "options": [
+      "A. Any lab tests",
+      "B. Freq tests",
+      "C. Infreq tests",
+      "D. Common tests"
+    ],
+    "answer": 2
+  },
+  {
+    "q": "Ex of core bc test?",
+    "options": [
+      "A. Vitamins",
+      "B. Specific proteins",
+      "C. Na, K, urea",
+      "D. Lipoproteins"
+    ],
+    "answer": 2
+  },
+  {
+    "q": "Ex of specialized bc test?",
+    "options": [
+      "A. DNA analysis",
+      "B. Glucose",
+      "C. Amylase",
+      "D. Calcium"
+    ],
+    "answer": 0
+  },
+  {
+    "q": "Ex of DFTs?",
+    "options": [
+      "A. Plasma K test",
+      "B. GTT",
+      "C. Urine glucose test",
+      "D. Urine protein test"
+    ],
+    "answer": 1
+  },
+  {
+    "q": "Type of lab personnel?",
+    "options": [
+      "A. Marketing",
+      "B. Management",
+      "C. Med, scientific",
+      "D. Logistic"
+    ],
+    "answer": 2
+  },
+  {
+    "q": "Med lab personnel job?",
+    "options": [
+      "A. Analysis",
+      "B. Management",
+      "C. Marketing",
+      "D. Consultation"
+    ],
+    "answer": 3
+  },
+  {
+    "q": "Scientific lab personnel job?",
+    "options": [
+      "A. Analysis",
+      "B. Consultation",
+      "C. Marketing",
+      "D. Management"
+    ],
+    "answer": 0
+  },
+  {
+    "q": "Specimen collection info?",
+    "options": [
+      "A. Correct specimen",
+      "B. Rq form complete",
+      "C. Quick result return",
+      "D. All of these"
+    ],
+    "answer": 3
+  },
+  {
+    "q": "How to get serum?",
+    "options": [
+      "A. Blood + PT + Cent.",
+      "B. Blood + ACT + Cent",
+      "C. Blood + PT + Sed",
+      "D. Blood + ACT + Sed"
+    ],
+    "answer": 0
+  },
+  {
+    "q": "How to get plasma?",
+    "options": [
+      "A. Blood + PT + Cent.",
+      "B. Blood + ACT + Cent",
+      "C. Blood + PT + Sed",
+      "D. Blood + ACT + Sed"
+    ],
+    "answer": 1
+  },
+  {
+    "q": "What is dangerous specimen?",
+    "options": [
+      "A. Any lab specimen",
+      "B. Simple specimen",
+      "C. Routine specimen",
+      "D. Dangerous infected specimen"
+    ],
+    "answer": 3
+  },
+  {
+    "q": "How to do with dangerous specimen?",
+    "options": [
+      "A. Note on the container",
+      "B. Note on the rq form",
+      "C. Use YDSS",
+      "D. Call to notify"
+    ],
+    "answer": 2
+  },
+  {
+    "q": "Sampling errors?",
+    "options": [
+      "A. Technical error",
+      "B. Time error",
+      "C. Incorrect container",
+      "D. All of these"
+    ],
+    "answer": 3
+  },
+  {
+    "q": "Sampling errors?",
+    "options": [
+      "A. Time error",
+      "B. Incorrect storage",
+      "C. Incorrect container",
+      "D. All of these"
+    ],
+    "answer": 3
+  },
+  {
+    "q": "How to test urine?",
+    "options": [
+      "A. Fresh urine",
+      "B. Clean dry container",
+      "C. Dipstick",
+      "D. All of these"
+    ],
+    "answer": 3
+  },
+  {
+    "q": "How to use strips?",
+    "options": [
+      "A. Immerse",
+      "B. Remove excess urine",
+      "C. Fixed length of time",
+      "D. All of these"
+    ],
+    "answer": 3
+  },
+  {
+    "q": "Range of strip urine test?",
+    "options": [
+      "A. Glu, Bil, UBG",
+      "B. DNA, RNA",
+      "C. Hormone",
+      "D. Enzyme"
+    ],
+    "answer": 0
+  },
+  {
+    "q": "Range of strip urine test?",
+    "options": [
+      "A. Hormone",
+      "B. Enzyme",
+      "C. Fat, oil",
+      "D. Ketone, pH, protein"
+    ],
+    "answer": 3
+  },
+  {
+    "q": "Range of strip urine test?",
+    "options": [
+      "A. DNA, RNA",
+      "B. Blood, nitrite",
+      "C. Lipid, oil",
+      "D. Vitamin"
+    ],
+    "answer": 1
+  },
+  {
+    "q": "Range of strip urine test?",
+    "options": [
+      "A. Vitamin",
+      "B. Histamine",
+      "C. Prostaglandin",
+      "D. SG, Leu, Bil."
+    ],
+    "answer": 3
+  },
+  {
+    "q": "Strip disadvantage?",
+    "options": [
+      "A. Read too quick",
+      "B. Left too long",
+      "C. Wrong storage",
+      "D. All of these"
+    ],
+    "answer": 3
+  },
+  {
+    "q": "Strip disadvantage?",
+    "options": [
+      "A. Read too quick",
+      "B. Left too long",
+      "C. Past expiry date",
+      "D. All of these"
+    ],
+    "answer": 3
+  },
+  {
+    "q": "Glycosuria indicates?",
+    "options": [
+      "A. DM",
+      "B. Jaundice",
+      "C. AKA, DKA",
+      "D. RTA, DKA"
+    ],
+    "answer": 0
+  },
+  {
+    "q": "Renal glycosuria?",
+    "options": [
+      "A. Glycosuria",
+      "B. In pregnancy",
+      "C. Normal GM",
+      "D. All of these"
+    ],
+    "answer": 3
+  },
+  {
+    "q": "Alimentary glycosuria?",
+    "options": [
+      "A. Glycosuria",
+      "B. Just after meal",
+      "C. Normal GM",
+      "D. All of these"
+    ],
+    "answer": 3
+  },
+  {
+    "q": "Bilirubinuria indicates?",
+    "options": [
+      "A. DM",
+      "B. Jaundice",
+      "C. AKA, DKA",
+      "D. RTA, DKA"
+    ],
+    "answer": 1
+  },
+  {
+    "q": "Urobilinogenuria indicates?",
+    "options": [
+      "A. Jaundice",
+      "B. AKA, DKA",
+      "C. RTA, DKA",
+      "D. Hemolysis"
+    ],
+    "answer": 3
+  },
+  {
+    "q": "Ketonuria indicates?",
+    "options": [
+      "A. Jaundice",
+      "B. AKA, DKA",
+      "C. UTI",
+      "D. Hemolysis"
+    ],
+    "answer": 1
+  },
+  {
+    "q": "Urine pH indicates?",
+    "options": [
+      "A. DM",
+      "B. Jaundice",
+      "C. UTI",
+      "D. RTA, DKA"
+    ],
+    "answer": 3
+  },
+  {
+    "q": "USG indicates?",
+    "options": [
+      "A. DM",
+      "B. Jaundice",
+      "C. Urine conc.",
+      "D. RTA, DKA"
+    ],
+    "answer": 2
+  },
+  {
+    "q": "Proteinuria indicates?",
+    "options": [
+      "A. RF",
+      "B. AKA, DKA",
+      "C. UTI",
+      "D. Hemolysis"
+    ],
+    "answer": 0
+  },
+  {
+    "q": "Hematuria indicates?",
+    "options": [
+      "A. DM",
+      "B. UTI",
+      "C. Jaundice",
+      "D. AKA, DKA"
+    ],
+    "answer": 1
+  },
+  {
+    "q": "Nitrituria indicates?",
+    "options": [
+      "A. Jaundice",
+      "B. Urine conc.",
+      "C. UTI",
+      "D. DM"
+    ],
+    "answer": 2
+  },
+  {
+    "q": "Leukocyturia indicates?",
+    "options": [
+      "A. UTI, acute inflammation",
+      "B. Urine conc.",
+      "C. RTA, DKA",
+      "D. Hemolysis"
+    ],
+    "answer": 0
+  },
+  {
+    "q": "Major liver Fn?",
+    "options": [
+      "A. Homeostasis",
+      "B. Mtb pathway",
+      "C. RES, detoxify",
+      "D. All of these"
+    ],
+    "answer": 3
+  },
+  {
+    "q": "Range of LFTs?",
+    "options": [
+      "A. Bil, AT",
+      "B. ALP, GGT",
+      "C. PP, PT",
+      "D. All of these"
+    ],
+    "answer": 3
+  },
+  {
+    "q": "Range of LFTs?",
+    "options": [
+      "A. Bil, AT, PP",
+      "B. UBG, urea",
+      "C. Ketone, pH",
+      "D. All of these"
+    ],
+    "answer": 0
+  },
+  {
+    "q": "Range of LFTs?",
+    "options": [
+      "A. SG, DNA",
+      "B. Glu, Leu",
+      "C. ALP, GGT, PT",
+      "D. All of these"
+    ],
+    "answer": 2
+  },
+  {
+    "q": "Bil. Indicates?",
+    "options": [
+      "A. Jaundice",
+      "B. ALD",
+      "C. Drugs",
+      "D. Liver tumor"
+    ],
+    "answer": 0
+  },
+  {
+    "q": "AT indicates?",
+    "options": [
+      "A. Jaundice",
+      "B. ALD",
+      "C. Drugs",
+      "D. Liver tumor"
+    ],
+    "answer": 1
+  },
+  {
+    "q": "ALP indicates?",
+    "options": [
+      "A. Alcohol",
+      "B. ALD",
+      "C. Cholestasis",
+      "D. Liver cancer"
+    ],
+    "answer": 2
+  },
+  {
+    "q": "GGT indicates?",
+    "options": [
+      "A. Alcohol",
+      "B. ALD",
+      "C. Cholestasis",
+      "D. Liver tumor"
+    ],
+    "answer": 2
+  },
+  {
+    "q": "PP indicates?",
+    "options": [
+      "A. Alcohol",
+      "B. Drugs",
+      "C. Cirrhosis",
+      "D. Liver cancer"
+    ],
+    "answer": 2
+  },
+  {
+    "q": "PT indicates?",
+    "options": [
+      "A. HSD",
+      "B. Drugs",
+      "C. Cirrhosis",
+      "D. Liver cancer"
+    ],
+    "answer": 0
+  },
+  {
+    "q": "ALP indicates?",
+    "options": [
+      "A. Liver tumor",
+      "B. Drugs",
+      "C. HSD",
+      "D. Alcohol"
+    ],
+    "answer": 0
+  },
+  {
+    "q": "ALP indicates?",
+    "options": [
+      "A. Alcohol",
+      "B. Cirrhosis",
+      "C. Drugs",
+      "D. Germ cell tumor"
+    ],
+    "answer": 3
+  },
+  {
+    "q": "GGT indicates?",
+    "options": [
+      "A. Alcohol",
+      "B. Cirrhosis",
+      "C. Germ cell tumor",
+      "D. All of these"
+    ],
+    "answer": 3
+  },
+  {
+    "q": "GGT indicates?",
+    "options": [
+      "A. Liver tumor",
+      "B. Drugs",
+      "C. Cirrhosis",
+      "D. All of these"
+    ],
+    "answer": 3
+  },
+  {
+    "q": "PP indicates?",
+    "options": [
+      "A. Alcohol",
+      "B. Drugs",
+      "C. Germ cell tumor",
+      "D. All of these"
+    ],
+    "answer": 3
+  },
+  {
+    "q": "PP indicates?",
+    "options": [
+      "A. Liver cancer",
+      "B. Alcohol",
+      "C. Drugs",
+      "D. All of these"
+    ],
+    "answer": 3
+  },
+  {
+    "q": "What is tumor?",
+    "options": [
+      "A. Normal tissue",
+      "B. Mass of tissue",
+      "C. Mass of cells",
+      "D. Mass of abn tissue"
+    ],
+    "answer": 3
+  },
+  {
+    "q": "What is TM?",
+    "options": [
+      "A. Sub in blood",
+      "B. r/t presence of tumor",
+      "C. r/t progress of tumor",
+      "D. All of these"
+    ],
+    "answer": 3
+  },
+  {
+    "q": "Cells producing TM?",
+    "options": [
+      "A. Normal cells",
+      "B. Tumor cells",
+      "C. Young cells",
+      "D. Normal & tumor cells"
+    ],
+    "answer": 3
+  },
+  {
+    "q": "Group of TM?",
+    "options": [
+      "A. CHO",
+      "B. Lipids",
+      "C. NA",
+      "D. Hor, enzymes"
+    ],
+    "answer": 3
+  },
+  {
+    "q": "Use of TM?",
+    "options": [
+      "A. MT, Dx",
+      "B. Px, SD",
+      "C. F/uAx",
+      "D. All of these"
+    ],
+    "answer": 3
+  },
+  {
+    "q": "Type of tumor Tx?",
+    "options": [
+      "A. Chemotherapy",
+      "B. Radiotherapy",
+      "C. Surgery",
+      "D. All of these"
+    ],
+    "answer": 3
+  },
+  {
+    "q": "Decreased TM indicates?",
+    "options": [
+      "A. Tx success",
+      "B. Tx failure",
+      "C. Tumor leftover",
+      "D. All of these"
+    ],
+    "answer": 0
+  },
+  {
+    "q": "Increased TM Indicates?",
+    "options": [
+      "A. Tx success",
+      "B. Tx failure",
+      "C. Tumor leftover",
+      "D. All of these"
+    ],
+    "answer": 1
+  },
+  {
+    "q": "Slow decreased TM indicates?",
+    "options": [
+      "A. Tx success",
+      "B. Tx failure",
+      "C. Tumor leftover",
+      "D. All of these"
+    ],
+    "answer": 2
+  },
+  {
+    "q": "Hepatoma TM?",
+    "options": [
+      "A. AFP",
+      "B. hCG",
+      "C. CA 125",
+      "D. AP"
+    ],
+    "answer": 0
+  },
+  {
+    "q": "Choriocarcinoma TM?",
+    "options": [
+      "A. AFP",
+      "B. hCG",
+      "C. CA 125",
+      "D. AP, PSA"
+    ],
+    "answer": 1
+  },
+  {
+    "q": "Ovarian TM?",
+    "options": [
+      "A. AFP",
+      "B. hCG",
+      "C. CA 125",
+      "D. AP, PSA"
+    ],
+    "answer": 2
+  },
+  {
+    "q": "Prostate TM?",
+    "options": [
+      "A. AFP",
+      "B. hCG",
+      "C. CA 125",
+      "D. AP, PSA"
+    ],
+    "answer": 3
+  },
+  {
+    "q": "Endocrine TM?",
+    "options": [
+      "A. Hormone",
+      "B. hCG",
+      "C. AP, PSA",
+      "D. All of these"
+    ],
+    "answer": 0
+  },
+  {
+    "q": "Myeloma TM?",
+    "options": [
+      "A. AP, PSA",
+      "B. Paraprotein",
+      "C. CA 125",
+      "D. hCG"
+    ],
+    "answer": 1
+  },
+  {
+    "q": "Definition of HT?",
+    "options": [
+      "A. 3CP, abn BP",
+      "B. 3CP, arrhythmia",
+      "C. 3CP, bradycardia",
+      "D. 3CP, ↑SABP"
+    ],
+    "answer": 0
+  },
+  {
+    "q": "Cx of left untreated HT?",
+    "options": [
+      "A. Stroke",
+      "B. HF, CKD",
+      "C. RP",
+      "D. All of these"
+    ],
+    "answer": 3
+  },
+  {
+    "q": "Cx of left untreated HT?",
+    "options": [
+      "A. Liver tumor",
+      "B. Skin rashes",
+      "C. HF, CKD, RP",
+      "D. All of these"
+    ],
+    "answer": 2
+  },
+  {
+    "q": "Definition of MHT?",
+    "options": [
+      "A. SHT +RP +RF",
+      "B. HT +stroke",
+      "C. HT +HF",
+      "D. HT +HR + stroke"
+    ],
+    "answer": 0
+  },
+  {
+    "q": "Cause of HT?",
+    "options": [
+      "A. CKD, RAS, 1oHA",
+      "B. Diarrhea",
+      "C. Low sex hormone",
+      "D. All of these"
+    ],
+    "answer": 0
+  },
+  {
+    "q": "Cause of HT?",
+    "options": [
+      "A. Constipation",
+      "B. PCC, CS, obese",
+      "C. N/V",
+      "D. All of these"
+    ],
+    "answer": 1
+  },
+  {
+    "q": "Cause of HT?",
+    "options": [
+      "A. N/V",
+      "B. Low intestinal flora",
+      "C. DM, ALC, CoA",
+      "D. All of these"
+    ],
+    "answer": 2
+  },
+  {
+    "q": "What is 1o HT?",
+    "options": [
+      "A. HT, unknown cause",
+      "B. HT, known cause",
+      "C. SHT",
+      "D. All of these"
+    ],
+    "answer": 0
+  },
+  {
+    "q": "What is 2o HT?",
+    "options": [
+      "A. HT, unknown cause",
+      "B. HT, known cause",
+      "C. SHT",
+      "D. All of these"
+    ],
+    "answer": 1
+  },
+  {
+    "q": "Drugs used for HT Tx?",
+    "options": [
+      "A. ACEIs/ARBs",
+      "B. BBs, CCBs",
+      "C. Diuretics",
+      "D. All of these"
+    ],
+    "answer": 3
+  },
+  {
+    "q": "Drugs used for HT Tx?",
+    "options": [
+      "A. PPI, antacid",
+      "B. ACEIs, ARBs",
+      "C. Antibiotics",
+      "D. Antivirals"
+    ],
+    "answer": 1
+  },
+  {
+    "q": "Drugs used for HT Tx?",
+    "options": [
+      "A. Antibacterial",
+      "B. Anthelmintics",
+      "C. CCBx, BBs",
+      "D. All of these"
+    ],
+    "answer": 2
+  },
+  {
+    "q": "Drugs used for HT Tx?",
+    "options": [
+      "A. Purgatives",
+      "B. Sedative",
+      "C. Hypnotic",
+      "D. Diuretics"
+    ],
+    "answer": 3
+  },
+  {
+    "q": "MOA of ACEIs?",
+    "options": [
+      "A. ↓Ald",
+      "B. VD",
+      "C. ↓CO",
+      "D. ↓Vascular tone"
+    ],
+    "answer": 0
+  },
+  {
+    "q": "MOA of ARBs?",
+    "options": [
+      "A. ↓Ald",
+      "B. VD",
+      "C. ↓CO",
+      "D. ↓Vascular tone"
+    ],
+    "answer": 3
+  },
+  {
+    "q": "MOA of BBs?",
+    "options": [
+      "A. ↓Ald",
+      "B. VD",
+      "C. ↓CO ( CARDIAC OUTPUT)",
+      "D. ↓Vascular tone"
+    ],
+    "answer": 2
+  },
+  {
+    "q": "MOA of CCBs?",
+    "options": [
+      "A. ↓Ald",
+      "B. VD",
+      "C. ↓CO",
+      "D. ↓Vascular tone"
+    ],
+    "answer": 1
+  },
+  {
+    "q": "MOA of diuretics?",
+    "options": [
+      "A. HoV",
+      "B. VD",
+      "C. ↓CO",
+      "D. ↓Vascular tone"
+    ],
+    "answer": 0
+  },
+  {
+    "q": "% Of diuretics are natriuresis?",
+    "options": [
+      "A. 0 %",
+      "B. 30%",
+      "C. 50%",
+      "D. 100%"
+    ],
+    "answer": 3
+  },
+  {
+    "q": "Normal BP?",
+    "options": [
+      "A. <120/80",
+      "B. <130/85",
+      "C. 140/90",
+      "D. 160/100"
+    ],
+    "answer": 1
+  },
+  {
+    "q": "Optimal BP?",
+    "options": [
+      "A. <120/80",
+      "B. <130/85",
+      "C. 140/90",
+      "D. 160/100"
+    ],
+    "answer": 0
+  },
+  {
+    "q": "Mild HT?",
+    "options": [
+      "A. <120/80",
+      "B. <130/85",
+      "C. 140/90 – 159/99",
+      "D. > 180/110"
+    ],
+    "answer": 2
+  },
+  {
+    "q": "Moderate HT?",
+    "options": [
+      "A. <120/80",
+      "B. <130/85",
+      "C. > 180/110",
+      "D. 160/100 – 179/109"
+    ],
+    "answer": 3
+  },
+  {
+    "q": "Sever HT?",
+    "options": [
+      "A. <120/80",
+      "B. <130/85",
+      "C. 140/90",
+      "D. > 180/110"
+    ],
+    "answer": 3
+  },
+  {
+    "q": "White coat HT?",
+    "options": [
+      "A. Real HT",
+      "B. Fake HT",
+      "C. SHT",
+      "D. Mild HT"
+    ],
+    "answer": 1
+  },
+  {
+    "q": "Fn of INS?",
+    "options": [
+      "A. GU, GL",
+      "B. GGN",
+      "C. PS, IU",
+      "D. All of these"
+    ],
+    "answer": 3
+  },
+  {
+    "q": "Fn of INS?",
+    "options": [
+      "A. GNG",
+      "B. Lipolysis",
+      "C. Ketogenesis",
+      "D. GU, GL, IU"
+    ],
+    "answer": 3
+  },
+  {
+    "q": "Fn of INS?",
+    "options": [
+      "A. GGN, PS, GU",
+      "B. Proteolysis",
+      "C. GNG",
+      "D. All of these"
+    ],
+    "answer": 0
+  },
+  {
+    "q": "Definition of DM?",
+    "options": [
+      "A. CED",
+      "B. c/t: HG",
+      "C. d/t: LI or IR",
+      "D. All of these"
+    ],
+    "answer": 3
+  },
+  {
+    "q": "Definition of DM?",
+    "options": [
+      "A. CED, HG, LI/IR",
+      "B. CED, HoG, LI",
+      "C. CED, HoV, IR",
+      "D. All of these"
+    ],
+    "answer": 0
+  },
+  {
+    "q": "Cause of 1o DM?",
+    "options": [
+      "A. Genetic",
+      "B. AID, virus, toxin",
+      "C. Obesity, PI",
+      "D. All of these"
+    ],
+    "answer": 1
+  },
+  {
+    "q": "Type of DM?",
+    "options": [
+      "A. 1o & 2oDM",
+      "B. 1o, 2o, & 3oDM",
+      "C. 1o, 2o, 3o, & 4oDM",
+      "D. None of them"
+    ],
+    "answer": 0
+  },
+  {
+    "q": "The features of T1DM?",
+    "options": [
+      "A. > 40y, ↑wt, 85%",
+      "B. < 30y, ↓wt, 15%",
+      "C. > 40%, ↓wt, 15%",
+      "D. All of these"
+    ],
+    "answer": 1
+  },
+  {
+    "q": "The features of T2DM?",
+    "options": [
+      "A. > 40%, ↓wt, 15%",
+      "B. > 40y, ↑wt, 85%",
+      "C. < 30y, ↓wt, 15%",
+      "D. All of these"
+    ],
+    "answer": 1
+  },
+  {
+    "q": "LCx of DM?",
+    "options": [
+      "A. MiA, RP",
+      "B. NepP",
+      "C. NeuP, MaA",
+      "D. All of these"
+    ],
+    "answer": 3
+  },
+  {
+    "q": "LCx of DM?",
+    "options": [
+      "A. HoT, gastritis",
+      "B. High plasma protein",
+      "C. MiA, MaA, NeuP",
+      "D. All of these"
+    ],
+    "answer": 2
+  },
+  {
+    "q": "How does INS control BGL?",
+    "options": [
+      "A. GU",
+      "B. GL",
+      "C. GGN",
+      "D. All of these"
+    ],
+    "answer": 3
+  },
+  {
+    "q": "How does INS control BGL?",
+    "options": [
+      "A. Protein synthesis",
+      "B. Ion up-taking",
+      "C. GU, GGN, GL",
+      "D. All of these"
+    ],
+    "answer": 2
+  },
+  {
+    "q": "How to delay the onset of DMCx?",
+    "options": [
+      "A. TGC",
+      "B. Alcohol",
+      "C. Eating",
+      "D. All of these"
+    ],
+    "answer": 0
+  },
+  {
+    "q": "What to do for TGC?",
+    "options": [
+      "A. Drugs, food",
+      "B. Exercise, mood",
+      "C. Sugar checking",
+      "D. All of these"
+    ],
+    "answer": 3
+  },
+  {
+    "q": "UA is produced from?",
+    "options": [
+      "A. Base A, G",
+      "B. Base C, T",
+      "C. Base T, U",
+      "D. None of them"
+    ],
+    "answer": 0
+  },
+  {
+    "q": "Ways to form urate?",
+    "options": [
+      "A. De novo synthesis",
+      "B. Ctb of NA, ATP",
+      "C. Bd of food NA",
+      "D. All of these"
+    ],
+    "answer": 3
+  },
+  {
+    "q": "Ways to excrete urate?",
+    "options": [
+      "A. By the skin",
+      "B. By the lungs",
+      "C. By urine, feces",
+      "D. All of these"
+    ],
+    "answer": 2
+  },
+  {
+    "q": "Ways to excrete urate?",
+    "options": [
+      "A. By the saliva",
+      "B. By the skin",
+      "C. By the lungs",
+      "D. By kidney, gut"
+    ],
+    "answer": 3
+  },
+  {
+    "q": "Major way to excrete urate?",
+    "options": [
+      "A. By the gut",
+      "B. By the skin",
+      "C. By the urine",
+      "D. All of them"
+    ],
+    "answer": 2
+  },
+  {
+    "q": "Minor way to excrete urate?",
+    "options": [
+      "A. By the saliva",
+      "B. By the feces",
+      "C. By the kidney",
+      "D. All of them"
+    ],
+    "answer": 1
+  },
+  {
+    "q": "What is uricolysis?",
+    "options": [
+      "A. Kidney urate excretion",
+      "B. Skin urate excretion",
+      "C. UA bd by gut bacteria",
+      "D. All of these"
+    ],
+    "answer": 2
+  },
+  {
+    "q": "What is 1o HUA?",
+    "options": [
+      "A. HUA, genetic cause",
+      "B. HUA, non-genetic cause",
+      "C. Severe hypouricemia",
+      "D. All of these"
+    ],
+    "answer": 0
+  },
+  {
+    "q": "What is 2o HUA?",
+    "options": [
+      "A. HUA, genetic cause",
+      "B. HUA, non-genetic cause",
+      "C. Severe hypouricemia",
+      "D. All of these"
+    ],
+    "answer": 1
+  },
+  {
+    "q": "What is gout?",
+    "options": [
+      "A. Clinical syndrome, HUA",
+      "B. Clinical syndrome, HoUA",
+      "C. Clinical syndrome, HT",
+      "D. All of these"
+    ],
+    "answer": 0
+  },
+  {
+    "q": "What is chronic gout?",
+    "options": [
+      "A. Gout",
+      "B. d/t: urate deposits",
+      "C. In the joint",
+      "D. All of these"
+    ],
+    "answer": 3
+  },
+  {
+    "q": "What is pseudogout?",
+    "options": [
+      "A. Other crystalline arthropathies",
+      "B. Without HUA",
+      "C. d/t: CPPC",
+      "D. all of these"
+    ],
+    "answer": 3
+  },
+  {
+    "q": "Drugs used for gout Tx?",
+    "options": [
+      "A. Probenecid",
+      "B. Allopurinol",
+      "C. AIDs, LPAD",
+      "D. All of these"
+    ],
+    "answer": 3
+  },
+  {
+    "q": "MOA of AIDs?",
+    "options": [
+      "A. ↓PG synthesis",
+      "B. ↑urate excretion",
+      "C. ↓urate production",
+      "D. All of these"
+    ],
+    "answer": 0
+  },
+  {
+    "q": "MOA of Allopurinol?",
+    "options": [
+      "A. ↓PG synthesis",
+      "B. ↑urate excretion",
+      "C. ↓urate production",
+      "D. All of these"
+    ],
+    "answer": 2
+  },
+  {
+    "q": "MOA of Probenecid?",
+    "options": [
+      "A. ↓PG synthesis",
+      "B. ↑urate excretion",
+      "C. ↓urate production",
+      "D. All of these"
+    ],
+    "answer": 1
+  },
+  {
+    "q": "Urate nephropathy?",
+    "options": [
+      "A. HUA CCx",
+      "B. d/t: urate deposits",
+      "C. In renal tissue/UTs",
+      "D. All of these"
+    ],
+    "answer": 3
+  },
+  {
+    "q": "What is urate ARF?",
+    "options": [
+      "A. HUA Cx",
+      "B. d/t: urate deposits",
+      "C. during Tx of cancer",
+      "D. all of these"
+    ],
+    "answer": 3
+  },
+  {
+    "q": "Definition of ARF?",
+    "options": [
+      "A. RF",
+      "B. Dvl over h/d",
+      "C. Reversible",
+      "D. All of these"
+    ],
+    "answer": 3
+  },
+  {
+    "q": "Definition of CRF?",
+    "options": [
+      "A. RF",
+      "B. Dvl over m/y",
+      "C. Irreversible",
+      "D. All of these"
+    ],
+    "answer": 3
+  },
+  {
+    "q": "Etiology of ARF?",
+    "options": [
+      "A. Kidney problem",
+      "B. KC problem",
+      "C. Urine blockage",
+      "D. All of these"
+    ],
+    "answer": 3
+  },
+  {
+    "q": "What indicates LRFn?",
+    "options": [
+      "A. HG, HoTH",
+      "B. HU, HCN",
+      "C. HN, HK",
+      "D. All of these"
+    ],
+    "answer": 1
+  },
+  {
+    "q": "Dx of ARF?",
+    "options": [
+      "A. Identify Pr/PoR factor",
+      "B. Hx/Exam of Pt",
+      "C. BCF",
+      "D. All of these"
+    ],
+    "answer": 3
+  },
+  {
+    "q": "Ex of BCF in ARF?",
+    "options": [
+      "A. HU, HCN",
+      "B. MA, HK",
+      "C. HUOsmo",
+      "D. All of these"
+    ],
+    "answer": 3
+  },
+  {
+    "q": "Pre-renal Mech?",
+    "options": [
+      "A. RRP",
+      "B. U/UO",
+      "C. KTD",
+      "D. None of them"
+    ],
+    "answer": 0
+  },
+  {
+    "q": "Post-renal Mech?",
+    "options": [
+      "A. RRP",
+      "B. U/UO",
+      "C. KTD",
+      "D. None of them"
+    ],
+    "answer": 1
+  },
+  {
+    "q": "Renal Mech?",
+    "options": [
+      "A. RRP",
+      "B. U/UO",
+      "C. KTD",
+      "D. None of them"
+    ],
+    "answer": 2
+  },
+  {
+    "q": "Pre-R factors?",
+    "options": [
+      "A. BL, HoV",
+      "B. RS, CA",
+      "C. GN, NT",
+      "D. All of them"
+    ],
+    "answer": 0
+  },
+  {
+    "q": "Post-R factors?",
+    "options": [
+      "A. BL, HoV",
+      "B. RS, CA",
+      "C. GN, NT",
+      "D. All of them"
+    ],
+    "answer": 1
+  },
+  {
+    "q": "Renal factors?",
+    "options": [
+      "A. BL, HoV",
+      "B. RS, CA",
+      "C. GN, NT",
+      "D. All of them"
+    ],
+    "answer": 2
+  },
+  {
+    "q": "Mx of ARF?",
+    "options": [
+      "A. Cx of Pre/Post-RF",
+      "B. Tx of UD, DFBC",
+      "C. Creatinine/K meas, HD",
+      "D. All of these"
+    ],
+    "answer": 3
+  },
+  {
+    "q": "Indication of HD?",
+    "options": [
+      "A. Rapidly ↑K",
+      "B. Severe acidosis",
+      "C. Fluid overload",
+      "D. All of these"
+    ],
+    "answer": 3
+  },
+  {
+    "q": "Life-threatening of ARF?",
+    "options": [
+      "A. HK",
+      "B. HU",
+      "C. MA",
+      "D. All of these"
+    ],
+    "answer": 3
+  },
+  {
+    "q": "Sex steroid hormone?",
+    "options": [
+      "A. Gonad SH",
+      "B. Control rep.fn",
+      "C. Control sex dvl",
+      "D. All of these"
+    ],
+    "answer": 3
+  },
+  {
+    "q": "Ex of SSH?",
+    "options": [
+      "A. T, E2, P",
+      "B. Ald, Cor, AD",
+      "C. INS, NA, DA",
+      "D. All of these"
+    ],
+    "answer": 0
+  },
+  {
+    "q": "What is fn of testes?",
+    "options": [
+      "A. E2, ovum production",
+      "B. T, sperm production",
+      "C. P, E2 production",
+      "D. All of these"
+    ],
+    "answer": 1
+  },
+  {
+    "q": "What is the fn of T?",
+    "options": [
+      "A. FSSC",
+      "B. MSSC",
+      "C. Ovum secretion",
+      "D. All of these"
+    ],
+    "answer": 1
+  },
+  {
+    "q": "MHoG results?",
+    "options": [
+      "A. ↓E2, ovum",
+      "B. ↓P, E2",
+      "C. ↓T, sperm",
+      "D. None of them"
+    ],
+    "answer": 2
+  },
+  {
+    "q": "M1o HoG?",
+    "options": [
+      "A. HoG, ↓testes",
+      "B. HoG, impaired HTH",
+      "C. HoG, impaired PG",
+      "D. None of them"
+    ],
+    "answer": 0
+  },
+  {
+    "q": "M2o HoG?",
+    "options": [
+      "A. HoG, ↓testes",
+      "B. HoG, impaired HTH, PG",
+      "C. HoG, ↓ovaries",
+      "D. None of them"
+    ],
+    "answer": 1
+  },
+  {
+    "q": "Cause of M1o HoG?",
+    "options": [
+      "A. KS, infection",
+      "B. Trauma, irradiation",
+      "C. Cytotoxic drugs",
+      "D. All of these"
+    ],
+    "answer": 3
+  },
+  {
+    "q": "Cause of M2o HoG?",
+    "options": [
+      "A. KS, infection",
+      "B. Trauma, irradiation",
+      "C. PT, HTH d/o",
+      "D. All of these"
+    ],
+    "answer": 2
+  },
+  {
+    "q": "E2 is responsible for?",
+    "options": [
+      "A. FSSC",
+      "B. FG",
+      "C. DOE",
+      "D. All of these"
+    ],
+    "answer": 3
+  },
+  {
+    "q": "FSHD results?",
+    "options": [
+      "A. Sub-fertility",
+      "B. Amenorrhea",
+      "C. Oligomenorrhea",
+      "D. All of these"
+    ],
+    "answer": 3
+  },
+  {
+    "q": "FSHD results?",
+    "options": [
+      "A. Sub-fertility",
+      "B. Hirsutism",
+      "C. Virilism",
+      "D. All of these"
+    ],
+    "answer": 3
+  },
+  {
+    "q": "What, HPRL causes on 2 sexes?",
+    "options": [
+      "A. Galactorrhea",
+      "B. Infertility",
+      "C. Hirsutism",
+      "D. All of these"
+    ],
+    "answer": 1
+  },
+  {
+    "q": "Early indication of HPRL woman?",
+    "options": [
+      "A. Hirsutism",
+      "B. Virilism",
+      "C. Galactorrhea, amenorrhea",
+      "D. MSSC"
+    ],
+    "answer": 2
+  },
+  {
+    "q": "What are causes of HPRL?",
+    "options": [
+      "A. Stress, drugs",
+      "B. 1oHT, PRLOMA",
+      "C. HIS",
+      "D. All of these"
+    ],
+    "answer": 3
+  },
+  {
+    "q": "What to do for PTAx?",
+    "options": [
+      "A. Urine test",
+      "B. BP measurement",
+      "C. DFTs, imaging",
+      "D. All of these"
+    ],
+    "answer": 3
+  },
+  {
+    "q": "Drug group use for PTTx?",
+    "options": [
+      "A. AIDs",
+      "B. NSAIDs",
+      "C. DA AG",
+      "D. DA ATG"
+    ],
+    "answer": 2
+  },
+  {
+    "q": "S/Sx for Infancy HoP?",
+    "options": [
+      "A. Short stature",
+      "B. Infertility",
+      "C. ↓Libido, MSSC",
+      "D. HoG, HoTH"
+    ],
+    "answer": 0
+  },
+  {
+    "q": "S/Sx for Rep.woman HoP?",
+    "options": [
+      "A. Short stature",
+      "B. Infertility",
+      "C. ↓Libido, MSSC",
+      "D. HoG, HoTH"
+    ],
+    "answer": 1
+  },
+  {
+    "q": "S/Sx for man HoP?",
+    "options": [
+      "A. Short stature",
+      "B. Infertility",
+      "C. ↓Libido, MSSC",
+      "D. HoG, HoTH"
+    ],
+    "answer": 2
+  },
+  {
+    "q": "S/Sx for elderly Pt HoP?",
+    "options": [
+      "A. Short stature",
+      "B. Infertility",
+      "C. ↓Libido, MSSC",
+      "D. HoG, HoTH."
+    ],
+    "answer": 3
+  }
+]/*__QUESTIONS_END__*/;
+
+let questions = loadQuestions();
+let currentSession = 0;
+let currentLocalIndex = 0;
+let showScore = false;
+let selectedAdminIndex = 0;
+let adminUnlocked = false;
+let userAnswers = Array(questions.length).fill(null);
+
+function cloneQuestions(qs) {
+  return JSON.parse(JSON.stringify(qs));
+}
+function loadQuestions() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed) && parsed.length) return parsed;
+    }
+  } catch (e) {
+    console.warn("Could not load saved questions", e);
+  }
+  return cloneQuestions(ORIGINAL_QUESTIONS);
+}
+function saveQuestions() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(questions));
+}
+function syncAnswersLength() {
+  while (userAnswers.length < questions.length) userAnswers.push(null);
+  if (userAnswers.length > questions.length) userAnswers.length = questions.length;
+}
+function totalSessions() { return 5; }
+function sessionStart(sessionIndex) {
+  if (sessionIndex <= 0) return 0;
+  if (sessionIndex === 1) return 30;
+  if (sessionIndex === 2) return 60;
+  if (sessionIndex === 3) return 90;
+  return 120;
+}
+function sessionEnd(sessionIndex) {
+  if (sessionIndex < 4) return Math.min(sessionStart(sessionIndex) + 30, questions.length);
+  return questions.length;
+}
+function currentSessionQuestions() {
+  return questions.slice(sessionStart(currentSession), sessionEnd(currentSession));
+}
+function globalIndex() {
+  return sessionStart(currentSession) + currentLocalIndex;
+}
+function clampSessionAndQuestion() {
+  if (currentSession < 0) currentSession = 0;
+  if (currentSession > 4) currentSession = 4;
+  const sessionQs = currentSessionQuestions();
+  if (!sessionQs.length && currentSession > 0) {
+    currentSession--;
+    currentLocalIndex = 0;
+    return clampSessionAndQuestion();
+  }
+  if (currentLocalIndex < 0) currentLocalIndex = 0;
+  if (currentLocalIndex >= sessionQs.length) currentLocalIndex = Math.max(0, sessionQs.length - 1);
+}
+function answerState(globalIdx) {
+  const chosen = userAnswers[globalIdx];
+  if (chosen === null || chosen === undefined) return "unanswered";
+  return chosen === questions[globalIdx].answer ? "correct" : "wrong";
+}
+function render() {
+  syncAnswersLength();
+  clampSessionAndQuestion();
+
+  document.getElementById("sessionTitle").textContent = `Session ${currentSession + 1} of 5`;
+  document.getElementById("prevSessionBtn").disabled = currentSession === 0;
+  document.getElementById("nextSessionBtn").disabled = currentSession === 4;
+
+  const sessionQs = currentSessionQuestions();
+  const start = sessionStart(currentSession);
+  const answered = sessionQs.filter((_, i) => userAnswers[start + i] !== null && userAnswers[start + i] !== undefined).length;
+  const progress = sessionQs.length ? (answered / sessionQs.length) * 100 : 0;
+  document.getElementById("progressFill").style.width = progress + "%";
+
+  renderBubbles();
+
+  if (showScore) renderScore();
+  else renderQuestion();
+}
+function renderBubbles() {
+  const bubbles = document.getElementById("bubbles");
+  bubbles.innerHTML = "";
+  const sessionQs = currentSessionQuestions();
+  const start = sessionStart(currentSession);
+
+  sessionQs.forEach((_, i) => {
+    const g = start + i;
+    const b = document.createElement("div");
+    b.className = "bubble";
+    const st = answerState(g);
+    if (st === "correct") b.classList.add("correct");
+    if (st === "wrong") b.classList.add("wrong");
+    if (!showScore && i === currentLocalIndex) b.classList.add("active");
+    b.textContent = i + 1;
+    b.onclick = () => {
+      currentLocalIndex = i;
+      showScore = false;
+      render();
+    };
+    bubbles.appendChild(b);
+  });
+}
+function renderQuestion() {
+  document.getElementById("questionView").style.display = "";
+  document.getElementById("scoreView").style.display = "none";
+
+  const sessionQs = currentSessionQuestions();
+  if (!sessionQs.length) return;
+
+  const q = sessionQs[currentLocalIndex];
+  const g = globalIndex();
+  const chosen = userAnswers[g];
+
+  document.getElementById("questionCounter").textContent = `Question ${currentLocalIndex + 1} of ${sessionQs.length}`;
+  document.getElementById("answeredCounter").textContent =
+    `Answered ${sessionQs.filter((_, i) => userAnswers[sessionStart(currentSession) + i] !== null && userAnswers[sessionStart(currentSession) + i] !== undefined).length}/${sessionQs.length}`;
+
+  document.getElementById("questionText").textContent = q.q;
+  const options = document.getElementById("options");
+  options.innerHTML = "";
+
+  q.options.forEach((opt, idx) => {
+    const btn = document.createElement("button");
+    btn.className = "option";
+    btn.textContent = opt;
+    if (chosen !== null && chosen !== undefined) {
+      if (idx === q.answer) btn.classList.add("correct");
+      if (idx === chosen && chosen !== q.answer) btn.classList.add("wrong");
+    }
+    btn.onclick = () => {
+      userAnswers[g] = idx;
+      render();
+    };
+    options.appendChild(btn);
+  });
+
+  document.getElementById("prevBtn").disabled = currentLocalIndex === 0;
+  document.getElementById("nextBtn").textContent =
+    currentLocalIndex === sessionQs.length - 1 ? "Finish Session" : "Next →";
+}
+function renderScore() {
+  document.getElementById("questionView").style.display = "none";
+  document.getElementById("scoreView").style.display = "";
+  const start = sessionStart(currentSession);
+  const sessionQs = currentSessionQuestions();
+
+  let correct = 0, wrong = 0, skipped = 0;
+  sessionQs.forEach((q, i) => {
+    const ans = userAnswers[start + i];
+    if (ans === null || ans === undefined) skipped++;
+    else if (ans === q.answer) correct++;
+    else wrong++;
+  });
+
+  const pct = sessionQs.length ? Math.round((correct / sessionQs.length) * 100) : 0;
+  document.getElementById("scoreTitle").textContent = `Session ${currentSession + 1} Complete`;
+  const circle = document.getElementById("scoreCircle");
+  circle.textContent = pct + "%";
+  circle.style.setProperty("--score-deg", (pct * 3.6) + "deg");
+  document.getElementById("correctCount").textContent = correct;
+  document.getElementById("wrongCount").textContent = wrong;
+  document.getElementById("skippedCount").textContent = skipped;
+}
+document.getElementById("prevSessionBtn").onclick = () => {
+  if (currentSession > 0) {
+    currentSession--;
+    currentLocalIndex = 0;
+    showScore = false;
+    render();
+  }
+};
+document.getElementById("nextSessionBtn").onclick = () => {
+  if (currentSession < 4) {
+    currentSession++;
+    currentLocalIndex = 0;
+    showScore = false;
+    render();
+  }
+};
+document.getElementById("prevBtn").onclick = () => {
+  if (currentLocalIndex > 0) {
+    currentLocalIndex--;
+    render();
+  }
+};
+document.getElementById("nextBtn").onclick = () => {
+  const sessionQs = currentSessionQuestions();
+  if (currentLocalIndex === sessionQs.length - 1) showScore = true;
+  else currentLocalIndex++;
+  render();
+};
+document.getElementById("restartBtn").onclick = () => {
+  const start = sessionStart(currentSession);
+  const end = sessionEnd(currentSession);
+  for (let i = start; i < end; i++) userAnswers[i] = null;
+  currentLocalIndex = 0;
+  showScore = false;
+  render();
+};
+
+// Admin functions
+function openAdmin() {
+  document.getElementById("adminOverlay").style.display = "block";
+  document.getElementById("passwordError").textContent = "";
+  document.getElementById("adminPassword").value = "";
+  if (adminUnlocked) showAdminPanel();
+  else {
+    document.getElementById("passwordGate").style.display = "block";
+    document.getElementById("adminPanel").style.display = "none";
+    setTimeout(() => document.getElementById("adminPassword").focus(), 50);
+  }
+}
+function closeAdmin() {
+  document.getElementById("adminOverlay").style.display = "none";
+}
+function showAdminPanel() {
+  adminUnlocked = true;
+  document.getElementById("passwordGate").style.display = "none";
+  document.getElementById("adminPanel").style.display = "block";
+  selectedAdminIndex = Math.min(selectedAdminIndex, Math.max(0, questions.length - 1));
+  renderAdminList();
+  loadAdminEditor();
+}
+function checkPassword() {
+  const pw = document.getElementById("adminPassword").value;
+  if (pw === ADMIN_PASSWORD) showAdminPanel();
+  else document.getElementById("passwordError").textContent = "Wrong password.";
+}
+function renderAdminList() {
+  const list = document.getElementById("adminList");
+  list.innerHTML = "";
+  document.getElementById("adminCount").textContent = `${questions.length} questions currently in quiz`;
+
+  questions.forEach((q, i) => {
+    const btn = document.createElement("button");
+    btn.className = "admin-item" + (i === selectedAdminIndex ? " active" : "");
+    btn.textContent = `${i + 1}. ${q.q.slice(0, 64)}${q.q.length > 64 ? "..." : ""}`;
+    btn.onclick = () => {
+      selectedAdminIndex = i;
+      renderAdminList();
+      loadAdminEditor();
+    };
+    list.appendChild(btn);
+  });
+}
+function loadAdminEditor() {
+  const q = questions[selectedAdminIndex];
+  if (!q) return;
+  document.getElementById("editQ").value = q.q;
+  document.getElementById("editA").value = q.options[0] || "";
+  document.getElementById("editB").value = q.options[1] || "";
+  document.getElementById("editC").value = q.options[2] || "";
+  document.getElementById("editD").value = q.options[3] || "";
+  document.getElementById("editAnswer").value = String(q.answer ?? 0);
+}
+function saveAdminEditor() {
+  const q = questions[selectedAdminIndex];
+  if (!q) return;
+  q.q = document.getElementById("editQ").value.trim() || "Untitled question";
+  q.options = [
+    document.getElementById("editA").value.trim() || "A. ",
+    document.getElementById("editB").value.trim() || "B. ",
+    document.getElementById("editC").value.trim() || "C. ",
+    document.getElementById("editD").value.trim() || "D. "
+  ];
+  q.answer = Number(document.getElementById("editAnswer").value);
+  saveQuestions();
+  renderAdminList();
+  render();
+}
+function addQuestion() {
+  questions.push({
+    q: "New question",
+    options: ["A. Option A", "B. Option B", "C. Option C", "D. Option D"],
+    answer: 0
+  });
+  userAnswers.push(null);
+  selectedAdminIndex = questions.length - 1;
+  saveQuestions();
+  renderAdminList();
+  loadAdminEditor();
+  render();
+}
+function deleteQuestion() {
+  if (!questions.length) return;
+  if (!confirm("Delete this question?")) return;
+  questions.splice(selectedAdminIndex, 1);
+  userAnswers.splice(selectedAdminIndex, 1);
+  selectedAdminIndex = Math.max(0, selectedAdminIndex - 1);
+  saveQuestions();
+  renderAdminList();
+  loadAdminEditor();
+  currentLocalIndex = 0;
+  showScore = false;
+  render();
+}
+function resetOriginal() {
+  if (!confirm("Reset to the original hardcoded questions? This will remove all saved edits.")) return;
+  localStorage.removeItem(STORAGE_KEY);
+  questions = cloneQuestions(ORIGINAL_QUESTIONS);
+  userAnswers = Array(questions.length).fill(null);
+  selectedAdminIndex = 0;
+  currentSession = 0;
+  currentLocalIndex = 0;
+  showScore = false;
+  renderAdminList();
+  loadAdminEditor();
+  render();
+}
+function exportAsHtml() {
+  saveAdminEditor();
+
+  let html = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
+  const bakedJson = JSON.stringify(questions, null, 2).replace(/<\/script>/g, "<\\/script>");
+  html = html.replace(
+    /const ORIGINAL_QUESTIONS = \/\*__QUESTIONS_START__\*\/[\s\S]*?\/\*__QUESTIONS_END__\*\/;/,
+    "const ORIGINAL_QUESTIONS = /*__QUESTIONS_START__*/" + bakedJson + "/*__QUESTIONS_END__*/;"
+  );
+
+  const blob = new Blob([html], {type:"text/html"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "norton_surgical_pathology_1_edited_quiz.html";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+document.getElementById("adminFab").onclick = openAdmin;
+document.getElementById("passwordSubmit").onclick = checkPassword;
+document.getElementById("passwordCancel").onclick = closeAdmin;
+document.getElementById("adminPassword").addEventListener("keydown", (e) => {
+  if (e.key === "Enter") checkPassword();
+});
+document.getElementById("closeAdmin").onclick = closeAdmin;
+document.getElementById("saveQuestionBtn").onclick = saveAdminEditor;
+document.getElementById("addQuestionBtn").onclick = addQuestion;
+document.getElementById("deleteQuestionBtn").onclick = deleteQuestion;
+document.getElementById("resetOriginalBtn").onclick = resetOriginal;
+document.getElementById("exportHtmlBtn").onclick = exportAsHtml;
+document.getElementById("adminOverlay").addEventListener("click", (e) => {
+  if (e.target.id === "adminOverlay") closeAdmin();
+});
+
+render();
+</script>
+</body>
+</html>
